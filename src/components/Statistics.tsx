@@ -3,6 +3,9 @@ import {useLiveQuery} from 'dexie-react-hooks';
 import {db} from '../db/database';
 import {formatDuration} from '../utils/utils';
 import {BarChart2, Clock, Hash, PieChart, Users, Shield} from 'lucide-react';
+import { Card } from './ui/Card';
+import { Typography } from './ui/Typography';
+import { Label } from './ui/Input';
 
 export const Statistics: React.FC = () => {
   const allSessions = useLiveQuery(() => db.sessions.toArray());
@@ -144,14 +147,14 @@ export const Statistics: React.FC = () => {
   return (
     <div className="p-4 space-y-6 max-w-2xl mx-auto pb-24">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-black text-slate-800 dark:text-white">Statistiques</h2>
+        <Typography variant="h3">Statistiques</Typography>
       </div>
 
       <div className={`grid grid-cols-1 ${selectedGame !== 'all' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+        <Card className="p-4 space-y-2">
+          <Label className="flex items-center gap-1">
             <PieChart size={12} /> Jeu
-          </label>
+          </Label>
           <select 
             value={selectedGame}
             onChange={(e) => { 
@@ -164,12 +167,12 @@ export const Statistics: React.FC = () => {
             <option value="all">Tous les jeux</option>
             {stats.games.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+        <Card className="p-4 space-y-2">
+          <Label className="flex items-center gap-1">
             <Users size={12} /> Adversaire
-          </label>
+          </Label>
           <select 
             value={selectedOpponent}
             onChange={(e) => setSelectedOpponent(e.target.value)}
@@ -178,13 +181,13 @@ export const Statistics: React.FC = () => {
             <option value="all">Tous les adversaires</option>
             {stats.opponents.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
-        </div>
+        </Card>
 
         {selectedGame !== 'all' && (
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+          <Card className="p-4 space-y-2">
+            <Label className="flex items-center gap-1">
               <Shield size={12} /> Armée
-            </label>
+            </Label>
             <select 
               value={selectedArmy}
               onChange={(e) => setSelectedArmy(e.target.value)}
@@ -193,30 +196,30 @@ export const Statistics: React.FC = () => {
               <option value="all">Toutes les armées</option>
               {stats.armies.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
-          </div>
+          </Card>
         )}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+        <Card className="p-4 text-center">
           <Hash className="mx-auto text-primary-500 mb-2" size={20} />
-          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Parties</p>
+          <Typography variant="small-caps" className="tracking-tighter text-slate-400">Parties</Typography>
           <p className="text-xl font-black text-slate-800 dark:text-white">{stats.totalGames}</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <Clock className="mx-auto text-primary-500 mb-2" size={20} />
-          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Temps Moyen</p>
+          <Typography variant="small-caps" className="tracking-tighter text-slate-400">Temps Moyen</Typography>
           <p className="text-sm font-black text-slate-800 dark:text-white mt-1">{formatDuration(stats.averageTime)}</p>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+        </Card>
+        <Card className="p-4 text-center">
           <BarChart2 className="mx-auto text-primary-500 mb-2" size={20} />
-          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Temps Total</p>
+          <Typography variant="small-caps" className="tracking-tighter text-slate-400">Temps Total</Typography>
           <p className="text-sm font-black text-slate-800 dark:text-white mt-1">{formatDuration(stats.totalTime)}</p>
-        </div>
+        </Card>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h3 className="text-center font-black uppercase tracking-widest text-slate-400 text-xs mb-8">Parties par mois</h3>
+      <Card className="p-6">
+        <Typography variant="small-caps" className="block text-center text-slate-400 text-xs mb-8">Parties par mois</Typography>
         {stats.gamesByMonth.length > 0 ? (
           <div className="flex items-end justify-between gap-2 h-32 px-2">
             {stats.gamesByMonth.map((m) => (
@@ -243,10 +246,10 @@ export const Statistics: React.FC = () => {
             <p className="text-slate-400 font-medium">Aucune donnée pour le graphique.</p>
           </div>
         )}
-      </div>
+      </Card>
 
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <h3 className="text-center font-black uppercase tracking-widest text-slate-400 text-xs mb-8">Répartition des résultats</h3>
+      <Card className="p-6">
+        <Typography variant="small-caps" className="block text-center text-slate-400 text-xs mb-8">Répartition des résultats</Typography>
         
         {stats.totalGames > 0 ? (
           <div className="space-y-8">
@@ -271,19 +274,19 @@ export const Statistics: React.FC = () => {
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <div className="inline-block w-3 h-3 bg-green-500 rounded-sm mr-1"></div>
-                <span className="text-[10px] font-black uppercase text-slate-500">Victoires</span>
+                <Typography variant="small-caps" className="text-slate-500">Victoires</Typography>
                 <p className="text-lg font-black text-slate-800 dark:text-white">{Math.round(stats.winRate)}%</p>
                 <p className="text-[10px] font-bold text-slate-400">{stats.wins} partie(s)</p>
               </div>
               <div className="text-center">
                 <div className="inline-block w-3 h-3 bg-slate-400 rounded-sm mr-1"></div>
-                <span className="text-[10px] font-black uppercase text-slate-500">Nuls</span>
+                <Typography variant="small-caps" className="text-slate-500">Nuls</Typography>
                 <p className="text-lg font-black text-slate-800 dark:text-white">{Math.round(stats.drawRate)}%</p>
                 <p className="text-[10px] font-bold text-slate-400">{stats.draws} partie(s)</p>
               </div>
               <div className="text-center">
                 <div className="inline-block w-3 h-3 bg-red-500 rounded-sm mr-1"></div>
-                <span className="text-[10px] font-black uppercase text-slate-500">Défaites</span>
+                <Typography variant="small-caps" className="text-slate-500">Défaites</Typography>
                 <p className="text-lg font-black text-slate-800 dark:text-white">{Math.round(stats.lossRate)}%</p>
                 <p className="text-[10px] font-bold text-slate-400">{stats.losses} partie(s)</p>
               </div>
@@ -294,19 +297,19 @@ export const Statistics: React.FC = () => {
             <p className="text-slate-400 font-medium">Aucune donnée pour cette sélection.</p>
           </div>
         )}
-      </div>
+      </Card>
 
       {selectedGame !== 'all' && stats.turnBreakdown.length > 0 && (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-          <h3 className="text-center font-black uppercase tracking-widest text-slate-400 text-xs">Durée par phase</h3>
+        <Card className="p-6 space-y-6">
+          <Typography variant="small-caps" className="block text-center text-slate-400 text-xs">Durée par phase</Typography>
           
           <div className="space-y-4">
             {stats.turnBreakdown.map((phase) => (
               <div key={phase.number} className="flex flex-col gap-2">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <Typography variant="small-caps" className="text-slate-400">
                     {phase.number === 0 ? 'Déploiement' : `Tour ${phase.number}`}
-                  </span>
+                  </Typography>
                   <div className="flex gap-4">
                     <div className="text-right">
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Moyen</p>
@@ -327,7 +330,7 @@ export const Statistics: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

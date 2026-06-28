@@ -1,6 +1,9 @@
 import React from 'react';
 import { db } from '../db/database';
 import { Trash2, Download, Upload, AlertTriangle } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Typography } from './ui/Typography';
 
 export const Settings: React.FC = () => {
   const handleExport = async () => {
@@ -94,10 +97,10 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-6">
-      <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-6">Paramètres</h2>
+      <Typography variant="h3" className="mb-6">Paramètres</Typography>
       
       <div className="space-y-4">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4 text-primary-600 dark:text-primary-400">
             <Download size={24} />
             <h3 className="text-lg font-bold">Sauvegarde</h3>
@@ -105,15 +108,16 @@ export const Settings: React.FC = () => {
           <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
             Exportez toutes vos données dans un fichier JSON pour les sauvegarder ou les transférer vers un autre appareil.
           </p>
-          <button
+          <Button
             onClick={handleExport}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-colors"
+            className="w-full py-3"
+            size="lg"
           >
             Exporter les données
-          </button>
-        </div>
+          </Button>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-3 mb-4 text-primary-600 dark:text-primary-400">
             <Upload size={24} />
             <h3 className="text-lg font-bold">Restauration</h3>
@@ -121,19 +125,26 @@ export const Settings: React.FC = () => {
           <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
             Importez des données depuis un fichier JSON précédemment exporté.
           </p>
-          <label className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-xl transition-colors cursor-pointer">
-            <Upload size={20} />
-            Importer un fichier
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImport}
-              className="hidden"
-            />
+          <label className="cursor-pointer">
+            <Button
+              as="div"
+              variant="secondary"
+              className="w-full py-3"
+              size="lg"
+            >
+              <Upload size={20} />
+              Importer un fichier
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImport}
+                className="hidden"
+              />
+            </Button>
           </label>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-red-200 dark:border-red-900/30 shadow-sm">
+        <Card className="p-6 border-red-200 dark:border-red-900/30">
           <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-400">
             <AlertTriangle size={24} />
             <h3 className="text-lg font-bold">Zone de danger</h3>
@@ -141,14 +152,16 @@ export const Settings: React.FC = () => {
           <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
             Cette action supprimera irréversiblement toutes les données enregistrées dans l'application.
           </p>
-          <button
+          <Button
             onClick={handleClearAll}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 font-bold rounded-xl transition-colors"
+            variant="danger"
+            className="w-full py-3 font-bold"
+            size="lg"
           >
             <Trash2 size={20} />
             Supprimer toutes les données
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     </div>
   );

@@ -4,6 +4,10 @@ import type {GameSession, Turn} from '../types/game';
 import {cn, formatDuration, formatSessionResults} from '../utils/utils';
 import {useTimer} from '../hooks/useTimer';
 import {CheckCircle, Clock, Copy, Edit2, History, Play, Plus, SkipForward, User} from 'lucide-react';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Typography } from './ui/Typography';
+import { Badge } from './ui/Badge';
 
 interface GameProps {
   session: GameSession;
@@ -165,13 +169,13 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
   return (
     <div className="p-3 space-y-4 max-w-2xl mx-auto pb-28">
       {/* Header Info */}
-      <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-xl relative overflow-hidden border border-slate-800">
+      <Card variant="dark" className="p-4">
         <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
         <div className="relative z-10 flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-black italic tracking-tighter leading-none">{session.gameName}</h2>
+            <Typography variant="h2" className="text-xl">{session.gameName}</Typography>
             <div className="flex flex-col gap-1 mt-1">
-              <p className="text-[9px] opacity-40 font-black uppercase tracking-[0.2em]">{session.scenarios.join(' • ')}</p>
+              <Typography variant="small-caps" className="opacity-40 tracking-[0.2em]">{session.scenarios.join(' • ')}</Typography>
             </div>
           </div>
           <div className="text-right">
@@ -180,52 +184,54 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
                 <Clock size={16} /> {formatDuration(globalElapsed)}
               </div>
             )}
-            <div className="px-1.5 py-0.5 bg-white/10 rounded font-black text-[8px] uppercase tracking-widest inline-block opacity-60">
+            <Badge className="bg-white/10 opacity-60">
               {session.status}
-            </div>
+            </Badge>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Player Scores Summary */}
       <div className="grid grid-cols-2 gap-3">
         {session.players.map(p => (
-          <div key={p.id} className={cn(
-            "p-3 rounded-xl border flex flex-col items-center justify-center transition-all",
+          <Card key={p.id} className={cn(
+            "p-3 flex flex-col items-center justify-center transition-all border rounded-xl shadow-none",
             p.isMe 
-              ? "bg-white dark:bg-slate-900 border-blue-100 dark:border-blue-900/30" 
-              : "bg-white dark:bg-slate-900 border-red-100 dark:border-red-900/30"
+              ? "border-blue-100 dark:border-blue-900/30" 
+              : "border-red-100 dark:border-red-900/30"
           )}>
             <div className="flex items-center gap-1.5 mb-0.5">
                <User size={10} className={p.isMe ? "text-blue-500" : "text-red-500"} />
-               <p className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500">{p.name}</p>
+               <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500 tracking-[0.1em]">{p.name}</Typography>
             </div>
             <p className="text-3xl font-black text-slate-800 dark:text-white leading-tight">{calculateTotal(p.id)}</p>
-          </div>
+          </Card>
         ))}
       </div>
 
       {session.status === 'setup' && (
-        <button 
+        <Button 
           onClick={handleStartDeployment} 
-          className="w-full py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary-500/20 active:scale-[0.98] transition-all"
+          size="lg"
+          className="w-full"
         >
           <Play size={24} fill="currentColor" /> Lancer le déploiement
-        </button>
+        </Button>
       )}
 
       {session.status === 'deployment' && (
         <div className="space-y-6 text-center py-6">
           <div className="p-10 border-2 border-dashed border-primary-300 dark:border-primary-900/50 rounded-3xl bg-primary-50 dark:bg-primary-950/20">
-            <p className="text-xs text-primary-600 dark:text-primary-400 font-black uppercase tracking-[0.2em] mb-4">Temps de déploiement</p>
+            <Typography variant="small-caps" className="text-primary-600 dark:text-primary-400 tracking-[0.2em] mb-4 block">Temps de déploiement</Typography>
             <p className="text-6xl font-mono font-black text-slate-800 dark:text-white">{formatDuration(deploymentElapsed)}</p>
           </div>
-          <button 
+          <Button 
             onClick={handleStartTurns} 
-            className="w-full py-5 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-green-500/20 active:scale-[0.98] transition-all"
+            size="lg"
+            className="w-full bg-green-600 hover:bg-green-700 shadow-green-500/20"
           >
             <Play size={24} fill="currentColor" /> Lancer les tours
-          </button>
+          </Button>
         </div>
       )}
 
@@ -233,38 +239,40 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
         <div className="space-y-4">
           <div className="flex justify-between items-end px-1">
             <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Phase Actuelle</p>
+              <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500 mb-0.5 block">Phase Actuelle</Typography>
               <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-none">
                 {isFinishing ? 'Fin de partie' : `Tour ${currentTurn?.number || 1}`}
               </h3>
             </div>
             {!session.isManual && (
               <div className="text-right">
-                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Temps du tour</p>
+                <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500 mb-0.5 block">Temps du tour</Typography>
                 <p className="font-mono text-xl font-black text-slate-700 dark:text-slate-300 leading-none">{formatDuration(turnElapsed)}</p>
               </div>
             )}
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+          <Card className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
-                    <th className="p-3 text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                      Joueur
-                      {!isFinishing && (
-                        <button 
-                          onClick={onAddCategory}
-                          className="p-1 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
-                        >
-                          <Plus size={10} strokeWidth={4} />
-                        </button>
-                      )}
+                    <th className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500">Joueur</Typography>
+                        {!isFinishing && (
+                          <button 
+                            onClick={onAddCategory}
+                            className="p-1 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                          >
+                            <Plus size={10} strokeWidth={4} />
+                          </button>
+                        )}
+                      </div>
                     </th>
                     {getCategories(undefined, isFinishing).map(cat => (
-                      <th key={cat} className="p-3 text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 text-center">
-                        {cat}
+                      <th key={cat} className="p-3 text-center">
+                        <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500">{cat}</Typography>
                       </th>
                     ))}
                   </tr>
@@ -298,65 +306,69 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
                   ))}
                   {isFinishing && getCategories(undefined, true).length === 0 && (
                     <tr>
-                      <td colSpan={getCategories(undefined, true).length + 1} className="p-6 text-center text-[10px] text-slate-400 dark:text-slate-500 italic font-medium">
-                        Aucune catégorie de fin de partie définie
+                      <td colSpan={getCategories(undefined, true).length + 1} className="p-6 text-center">
+                        <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500 italic font-medium lowercase normal-case">Aucune catégorie de fin de partie définie</Typography>
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
 
           <div className="flex gap-3 pt-1">
             {isFinishing ? (
-              <button 
+              <Button 
                 onClick={confirmFinishGame} 
-                className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-green-500/20 active:scale-[0.98] transition-all"
+                size="lg"
+                className="w-full bg-green-600 hover:bg-green-700 shadow-green-500/20"
               >
                 <CheckCircle size={24} /> Valider le résultat
-              </button>
+              </Button>
             ) : (
               <>
-                <button 
+                <Button 
                   onClick={handleNextTurn} 
-                  className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
+                  className="flex-1 shadow-lg shadow-primary-500/20 active:scale-95"
                 >
                   <SkipForward size={18} fill="currentColor" /> Tour suivant
-                </button>
-                <button 
+                </Button>
+                <Button 
                   onClick={handleFinishGame} 
-                  className="flex-1 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-black text-xs flex items-center justify-center gap-2 hover:bg-red-500 hover:text-white transition-all active:scale-95"
+                  variant="secondary"
+                  className="flex-1 hover:bg-red-500 hover:text-white active:scale-95"
                 >
                   <CheckCircle size={18} /> Fin
-                </button>
+                </Button>
               </>
             )}
           </div>
 
           {/* Previous Turns History */}
           <div className="space-y-3 pt-2">
-            <h3 className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 flex items-center gap-2 ml-1">
+            <Typography variant="section-title" className="ml-1">
               <History size={14} /> Historique
-            </h3>
+            </Typography>
             <div className="space-y-3">
               {[...session.turns].reverse().slice(1).map(turn => (
-                <div key={turn.number} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                <Card key={turn.number} className="overflow-hidden">
                   <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                        <span className="bg-slate-900 dark:bg-slate-700 text-white w-5 h-5 rounded flex items-center justify-center text-[9px] font-black">T{turn.number}</span>
-                       <span className="font-black text-[10px] text-slate-700 dark:text-slate-300 uppercase tracking-widest">Tour {turn.number}</span>
+                       <Typography variant="small-caps" className="text-slate-700 dark:text-slate-300">Tour {turn.number}</Typography>
                     </div>
-                    <button 
+                    <Button 
+                      variant={editingTurnNumber === turn.number ? 'primary' : 'ghost'}
+                      size="icon"
                       onClick={() => setEditingTurnNumber(editingTurnNumber === turn.number ? null : turn.number)}
                       className={cn(
-                        "p-1.5 rounded-lg transition-all",
-                        editingTurnNumber === turn.number ? "bg-primary-600 text-white shadow-lg" : "text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
+                        "p-1.5 rounded-lg",
+                        editingTurnNumber === turn.number && "shadow-lg"
                       )}
                     >
                       <Edit2 size={14} />
-                    </button>
+                    </Button>
                   </div>
                   
                   {editingTurnNumber === turn.number ? (
@@ -406,13 +418,13 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
                     <div className="p-3 grid grid-cols-2 gap-3 bg-white dark:bg-slate-900/50">
                       {session.players.map(p => (
                         <div key={p.id} className="flex flex-col gap-0.5">
-                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{p.name}</span>
+                          <Typography variant="small-caps" className="text-slate-400 dark:text-slate-500">{p.name}</Typography>
                           <span className="font-black text-base text-slate-800 dark:text-white">{(turn.scores[p.id] || []).reduce((s, e) => s + e.points, 0)} <span className="text-[9px] opacity-30">pts</span></span>
                         </div>
                       ))}
                     </div>
                   )}
-                </div>
+                </Card>
               ))}
               {session.turns.length <= 1 && (
                 <div className="p-6 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl text-center">
@@ -426,14 +438,16 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
 
       {session.status === 'finished' && (
         <div className="text-center space-y-8 py-10 px-2 animate-in fade-in zoom-in duration-500">
-          <div className={cn(
-            "p-12 rounded-3xl shadow-2xl relative overflow-hidden",
-            session.result === 'victory' ? "bg-green-600 text-white" :
-            session.result === 'defeat' ? "bg-red-600 text-white" : "bg-slate-700 text-white"
-          )}>
+          <Card 
+            className={cn(
+              "p-12 shadow-2xl relative overflow-hidden",
+              session.result === 'victory' ? "bg-green-600 text-white border-none" :
+              session.result === 'defeat' ? "bg-red-600 text-white border-none" : "bg-slate-700 text-white border-none"
+            )}
+          >
             <div className="absolute top-0 left-0 w-full h-full bg-white/10 opacity-20 -rotate-12 translate-y-20 translate-x-20 rounded-3xl pointer-events-none"></div>
             <div className="relative z-10">
-              <p className="text-xs uppercase font-black tracking-[0.3em] mb-4 opacity-70">Résultat de la Partie</p>
+              <Typography variant="small-caps" className="mb-4 opacity-70 tracking-[0.3em] block">Résultat de la Partie</Typography>
               <h2 className="text-6xl font-black mb-4 tracking-tighter italic">
                 {session.result === 'victory' ? 'VICTOIRE' :
                  session.result === 'defeat' ? 'DÉFAITE' : 'MATCH NUL'}
@@ -444,25 +458,26 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
                 <span className="text-lg opacity-40">vs</span>
                 <span>{Math.max(...session.players.filter(p => !p.isMe).map(p => calculateTotal(p.id)))}</span>
               </p>
-              <button 
+              <Button 
                 onClick={handleCopyResult}
-                className="mt-6 flex items-center gap-2 mx-auto bg-white/20 hover:bg-white/30 transition-colors px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest"
+                className="mt-6 mx-auto bg-white/20 hover:bg-white/30 border-none text-[10px] py-2 px-4"
               >
                 <Copy size={12} />
                 {copied ? 'Copié !' : 'Copier le résultat'}
-              </button>
+              </Button>
             </div>
-          </div>
-          <button 
+          </Card>
+          <Button 
             onClick={() => window.location.reload()} 
-            className="w-full py-5 bg-white dark:bg-slate-900 border-2 border-slate-800 dark:border-slate-700 text-slate-900 dark:text-white rounded-2xl font-black text-lg hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all shadow-xl active:scale-95"
+            variant="outline"
+            size="lg"
+            className="w-full py-5 text-slate-900 dark:text-white border-slate-800 dark:border-slate-700 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 shadow-xl"
           >
             Retour à l'accueil
-          </button>
+          </Button>
         </div>
       )}
     </div>
   );
 };
 
-// Helper for cn (already imported at the top)

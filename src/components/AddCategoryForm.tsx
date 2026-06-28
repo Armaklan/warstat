@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { db } from '../db/database';
 import type { GameSession } from '../types/game';
 import { X, Check } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Input, Label } from './ui/Input';
+import { Typography } from './ui/Typography';
 
 interface AddCategoryFormProps {
   session: GameSession;
@@ -72,67 +75,65 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({ session, onBac
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
       <div className="max-w-md mx-auto space-y-8">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-black text-slate-800 dark:text-white">Nouvelle catégorie</h2>
-          <button 
+          <Typography variant="h3">Nouvelle catégorie</Typography>
+          <Button 
+            variant="secondary"
+            size="icon"
             onClick={onBack}
-            className="p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400"
           >
             <X size={24} />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+            <Label htmlFor="category-name">
               Nom de la catégorie
-            </label>
-            <input
+            </Label>
+            <Input
+              id="category-name"
               autoFocus
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Ex: Primaire, Assassinat..."
-              className="w-full p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-lg font-bold focus:ring-4 ring-primary-500/10 outline-none transition-all dark:text-white"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+            <Label>
               Type de scoring
-            </label>
+            </Label>
             <div className="grid grid-cols-2 gap-4">
-              <button
+              <Button
                 type="button"
+                variant={type === 'turn' ? 'primary' : 'outline'}
+                size="lg"
                 onClick={() => setType('turn')}
-                className={`p-4 rounded-2xl border-2 font-bold transition-all ${
-                  type === 'turn' 
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' 
-                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400'
-                }`}
+                className="py-4"
               >
                 Par tour
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant={type === 'global' ? 'primary' : 'outline'}
+                size="lg"
                 onClick={() => setType('global')}
-                className={`p-4 rounded-2xl border-2 font-bold transition-all ${
-                  type === 'global' 
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' 
-                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400'
-                }`}
+                className="py-4"
               >
                 Global
-              </button>
+              </Button>
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={!name.trim()}
-            className="w-full py-5 bg-primary-600 disabled:opacity-50 hover:bg-primary-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-primary-500/20 active:scale-[0.98] transition-all mt-8"
+            className="w-full mt-8"
           >
             <Check size={24} strokeWidth={3} /> Valider
-          </button>
+          </Button>
         </form>
       </div>
     </div>

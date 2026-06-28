@@ -4,6 +4,10 @@ import type { GameSession, Player, GameModel } from '../types/game';
 import { Plus, Trash2, Play, Save, CheckCircle2 } from 'lucide-react';
 import { Autocomplete } from './Autocomplete';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Button } from './ui/Button';
+import { Input, Label } from './ui/Input';
+import { Typography } from './ui/Typography';
+import { Card } from './ui/Card';
 
 interface SetupProps {
   onStart: (sessionId: number) => void;
@@ -150,13 +154,13 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
   return (
     <div className="p-4 max-w-md mx-auto space-y-8 pb-32">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-slate-800 dark:text-white">Nouvelle Partie</h2>
+        <Typography variant="h3">Nouvelle Partie</Typography>
         <p className="text-slate-500 dark:text-slate-400 text-sm">Configurez votre session de jeu</p>
       </div>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Nom du jeu</label>
+          <Label>Nom du jeu</Label>
           <Autocomplete
             value={gameName}
             onChange={setGameName}
@@ -172,7 +176,7 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Mon armée</label>
+          <Label>Mon armée</Label>
           <Autocomplete
             value={myArmy}
             onChange={setMyArmy}
@@ -182,12 +186,12 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         </div>
 
         {showModelConfig && (
-          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+          <Card className="p-4 bg-slate-50 dark:bg-slate-800/50 space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Catégories par tour</label>
+              <Label>Catégories par tour</Label>
               {turnCategories.map((cat, i) => (
                 <div key={i} className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={cat}
                     onChange={(e) => {
@@ -195,18 +199,27 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
                       newCats[i] = e.target.value;
                       setTurnCategories(newCats);
                     }}
-                    className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs dark:text-white"
+                    className="flex-1 p-2 text-xs"
                   />
-                  <button onClick={() => setTurnCategories(turnCategories.filter((_, idx) => idx !== i))} className="text-red-500"><Trash2 size={16}/></button>
+                  <Button variant="danger" size="icon" onClick={() => setTurnCategories(turnCategories.filter((_, idx) => idx !== i))}>
+                    <Trash2 size={16}/>
+                  </Button>
                 </div>
               ))}
-              <button onClick={() => setTurnCategories([...turnCategories, ''])} className="text-[10px] font-bold text-primary-500 flex items-center gap-1"><Plus size={14}/> Ajouter une catégorie</button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setTurnCategories([...turnCategories, ''])}
+                className="text-primary-500 lowercase normal-case font-bold"
+              >
+                <Plus size={14}/> Ajouter une catégorie
+              </Button>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Catégories de fin de partie</label>
+              <Label>Catégories de fin de partie</Label>
               {globalCategories.map((cat, i) => (
                 <div key={i} className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={cat}
                     onChange={(e) => {
@@ -214,24 +227,34 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
                       newCats[i] = e.target.value;
                       setGlobalCategories(newCats);
                     }}
-                    className="flex-1 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs dark:text-white"
+                    className="flex-1 p-2 text-xs"
                   />
-                  <button onClick={() => setGlobalCategories(globalCategories.filter((_, idx) => idx !== i))} className="text-red-500"><Trash2 size={16}/></button>
+                  <Button variant="danger" size="icon" onClick={() => setGlobalCategories(globalCategories.filter((_, idx) => idx !== i))}>
+                    <Trash2 size={16}/>
+                  </Button>
                 </div>
               ))}
-              <button onClick={() => setGlobalCategories([...globalCategories, ''])} className="text-[10px] font-bold text-primary-500 flex items-center gap-1"><Plus size={14}/> Ajouter une catégorie de fin de partie</button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setGlobalCategories([...globalCategories, ''])}
+                className="text-primary-500 lowercase normal-case font-bold"
+              >
+                <Plus size={14}/> Ajouter une catégorie de fin de partie
+              </Button>
             </div>
-            <button 
+            <Button 
               onClick={handleSaveModel}
-              className="w-full py-2 bg-slate-800 text-white rounded-xl text-xs font-black uppercase flex items-center justify-center gap-2"
+              className="w-full text-xs"
+              variant="primary"
             >
               <Save size={16}/> Enregistrer le modèle
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
 
         <div className="space-y-3">
-          <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Scénarios</label>
+          <Label>Scénarios</Label>
           <div className="space-y-2">
             {scenarios.map((s, i) => (
               <div key={i} className="flex gap-2 group">
@@ -243,26 +266,28 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
                   className="p-3 text-sm rounded-xl"
                 />
                 {scenarios.length > 1 && (
-                  <button onClick={() => handleRemoveScenario(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                  <Button variant="ghost" size="icon" onClick={() => handleRemoveScenario(i)} className="text-slate-300 hover:text-red-500">
                     <Trash2 size={20} />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}
           </div>
-          <button 
+          <Button 
+            variant="ghost"
+            size="sm"
             onClick={handleAddScenario} 
-            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 text-xs font-bold hover:opacity-80 transition-opacity ml-1"
+            className="text-primary-600 dark:text-primary-400 lowercase normal-case font-bold"
           >
             <Plus size={16} /> Ajouter un scénario
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3 pt-2">
-          <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Adversaires</label>
+          <Label>Adversaires</Label>
           <div className="space-y-3">
             {opponents.map((o, i) => (
-              <div key={i} className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50 relative group">
+              <Card key={i} className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/30 relative group rounded-2xl">
                 {opponents.length > 1 && (
                   <button 
                     onClick={() => handleRemoveOpponent(i)} 
@@ -287,15 +312,17 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
                     className="p-3 text-sm rounded-xl"
                   />
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
-          <button 
+          <Button 
+            variant="ghost"
+            size="sm"
             onClick={handleAddOpponent} 
-            className="flex items-center gap-2 text-primary-600 dark:text-primary-400 text-xs font-bold hover:opacity-80 transition-opacity ml-1"
+            className="text-primary-600 dark:text-primary-400 lowercase normal-case font-bold"
           >
             <Plus size={16} /> Ajouter un adversaire
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -322,25 +349,26 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         {isFinished && (
           <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Date de la partie</label>
-              <input 
+              <Label>Date de la partie</Label>
+              <Input 
                 type="date"
                 value={gameDate}
                 onChange={(e) => setGameDate(e.target.value)}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-2 ring-primary-500/20 transition-all"
+                className="p-3 text-sm"
               />
             </div>
           </div>
         )}
       </div>
 
-      <button
+      <Button
         onClick={handleStartGame}
         disabled={!gameName.trim()}
-        className="w-full py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 transition-all shadow-xl shadow-primary-500/20 active:scale-[0.98]"
+        size="lg"
+        className="w-full"
       >
         <Play size={24} fill="currentColor" /> {isFinished ? 'Enregistrer la partie' : 'Lancer la partie'}
-      </button>
+      </Button>
     </div>
   );
 };
