@@ -84,6 +84,24 @@ export const Statistics: React.FC = () => {
       }))
       .sort((a, b) => a.number - b.number);
 
+    // Games by month breakdown
+    const gamesByMonth: Record<string, number> = {};
+    filtered.forEach(s => {
+      const date = new Date(s.createdAt || s.startTime);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      gamesByMonth[monthKey] = (gamesByMonth[monthKey] || 0) + 1;
+    });
+
+    const formattedMonths = Object.entries(gamesByMonth)
+      .map(([month, count]) => ({
+        month,
+        count,
+        label: new Date(month + '-02').toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    const maxGamesInMonth = Math.max(0, ...formattedMonths.map(m => m.count));
+
     return {
       totalGames,
       totalTime,
@@ -97,7 +115,9 @@ export const Statistics: React.FC = () => {
       games,
       opponents,
       turnBreakdown: formattedBreakdown,
-      globalMaxTurnDuration: Math.max(0, ...formattedBreakdown.map(b => b.max))
+      globalMaxTurnDuration: Math.max(0, ...formattedBreakdown.map(b => b.max)),
+      gamesByMonth: formattedMonths,
+      maxGamesInMonth
     };
   }, [allSessions, selectedGame, selectedOpponent]);
 
@@ -155,6 +175,36 @@ export const Statistics: React.FC = () => {
           <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400">Temps Total</p>
           <p className="text-sm font-black text-slate-800 dark:text-white mt-1">{formatDuration(stats.totalTime)}</p>
         </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h3 className="text-center font-black uppercase tracking-widest text-slate-400 text-xs mb-8">Parties par mois</h3>
+        {stats.gamesByMonth.length > 0 ? (
+          <div className="flex items-end justify-between gap-2 h-32 px-2">
+            {stats.gamesByMonth.map((m) => (
+              <div key={m.month} className="flex-1 flex flex-col items-center gap-2 group relative">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg relative h-24 flex items-end overflow-hidden">
+                  <div 
+                    style={{ height: `${(m.count / stats.maxGamesInMonth) * 100}%` }}
+                    className="w-full bg-primary-500 rounded-t-lg transition-all duration-500 group-hover:bg-primary-400"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 dark:bg-black/20 pointer-events-none">
+                    <span className="text-[10px] font-black text-slate-800 dark:text-white bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded shadow-sm border border-slate-200 dark:border-slate-800">
+                      {m.count}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-black uppercase text-slate-400 truncate w-full text-center">
+                  {m.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-slate-400 font-medium">Aucune donnée pour le graphique.</p>
+          </div>
+        )}
       </div>
 
       <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">

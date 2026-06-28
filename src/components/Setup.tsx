@@ -103,6 +103,7 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
       scenarios: scenarios.filter(s => s.trim()),
       players,
       startTime: new Date(),
+      createdAt: new Date(),
       turns: hasCategories ? [{
         number: 1,
         startTime: new Date(),

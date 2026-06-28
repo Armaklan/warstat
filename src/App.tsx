@@ -133,7 +133,9 @@ function App() {
                   </div>
                   <div>
                     <p className="font-black text-lg text-slate-800 dark:text-white leading-tight">{s.gameName}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{new Date(s.startTime).toLocaleDateString()}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold tracking-wider mt-1">
+                      Créée le {new Date(s.createdAt || s.startTime).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end gap-2">

@@ -22,6 +22,7 @@ export interface GameSession {
   scenarios: string[];
   players: Player[];
   startTime: Date;
+  createdAt: Date;
   endTime?: Date;
   deploymentStartTime?: Date;
   deploymentEndTime?: Date;

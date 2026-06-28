@@ -48,6 +48,9 @@ export const Settings: React.FC = () => {
             // Import sessions
             for (const session of data.sessions) {
               const { id, ...sessionData } = session;
+              if (!sessionData.createdAt) {
+                sessionData.createdAt = sessionData.startTime || new Date();
+              }
               await db.sessions.add(sessionData);
             }
             // Import game models if they exist in export

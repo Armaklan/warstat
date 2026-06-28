@@ -7,8 +7,8 @@ export class WarstatDatabase extends Dexie {
 
   constructor() {
     super('WarstatDB');
-    this.version(2).stores({
-      sessions: '++id, gameName, startTime, status',
+    this.version(3).stores({
+      sessions: '++id, gameName, startTime, createdAt, status',
       gameModels: '++id, &gameName'
     });
   }
