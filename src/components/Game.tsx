@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { db } from '../db/database';
-import type { GameSession, ScoreEntry, Turn } from '../types/game';
-import { formatDuration } from '../utils/utils';
-import { useTimer } from '../hooks/useTimer';
-import { Play, SkipForward, CheckCircle, Plus, Clock, History, Edit2, User, Trophy, Layout, ChevronDown, ChevronUp } from 'lucide-react';
-import { cn } from '../utils/utils';
+import React, {useState} from 'react';
+import {db} from '../db/database';
+import type {GameSession, Turn} from '../types/game';
+import {cn, formatDuration} from '../utils/utils';
+import {useTimer} from '../hooks/useTimer';
+import {CheckCircle, Clock, Edit2, History, Play, Plus, SkipForward, User} from 'lucide-react';
 
 interface GameProps {
   session: GameSession;
@@ -153,12 +152,6 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
     const targetTurn = turn || currentTurn;
     if (!targetTurn) return 0;
     return (targetTurn.scores[playerId] || []).find(s => s.category === category)?.points || 0;
-  };
-
-  const calculateTurnTotal = (playerId: string) => {
-    const lastTurn = session.turns[session.turns.length - 1];
-    if (!lastTurn) return 0;
-    return (lastTurn.scores[playerId] || []).reduce((s, e) => s + e.points, 0);
   };
 
   return (

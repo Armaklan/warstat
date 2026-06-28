@@ -56,7 +56,11 @@ export const AddCategoryForm: React.FC<AddCategoryFormProps> = ({ session, onBac
     };
 
     if (existingModel) {
-      await db.gameModels.update(existingModel.id!, modelData);
+      await db.gameModels.update(existingModel.id!, {
+        gameName: modelData.gameName,
+        turnCategories: modelData.turnCategories,
+        globalCategories: modelData.globalCategories
+      });
     } else {
       await db.gameModels.add(modelData);
     }

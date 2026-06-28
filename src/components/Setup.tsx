@@ -59,7 +59,11 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
       globalCategories: globalCategories.filter(c => c.trim())
     };
     if (existingModel) {
-      await db.gameModels.update(existingModel.id!, modelData);
+      await db.gameModels.update(existingModel.id!, {
+        gameName,
+        turnCategories: modelData.turnCategories,
+        globalCategories: modelData.globalCategories
+      });
     } else {
       await db.gameModels.add(modelData);
     }
