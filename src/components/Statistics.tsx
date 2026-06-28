@@ -34,6 +34,7 @@ export const Statistics: React.FC = () => {
 
     const totalGames = filtered.length;
     let totalTime = 0;
+    let timedGamesCount = 0;
     let wins = 0;
     let losses = 0;
     let draws = 0;
@@ -52,29 +53,33 @@ export const Statistics: React.FC = () => {
     };
 
     filtered.forEach(s => {
-      if (s.endTime && s.startTime) {
-        totalTime += new Date(s.endTime).getTime() - new Date(s.startTime).getTime();
+      if (!s.isManual) {
+        if (s.endTime && s.startTime) {
+          totalTime += new Date(s.endTime).getTime() - new Date(s.startTime).getTime();
+          timedGamesCount++;
+        }
+
+        // Deployment duration
+        if (s.deploymentStartTime && s.deploymentEndTime) {
+          const duration = new Date(s.deploymentEndTime).getTime() - new Date(s.deploymentStartTime).getTime();
+          addDurationToBreakdown(0, duration);
+        }
+
+        // Turns duration
+        s.turns.forEach(t => {
+          if (t.startTime && t.endTime) {
+            const duration = new Date(t.endTime).getTime() - new Date(t.startTime).getTime();
+            addDurationToBreakdown(t.number, duration);
+          }
+        });
       }
+
       if (s.result === 'victory') wins++;
       else if (s.result === 'defeat') losses++;
       else draws++;
-
-      // Deployment duration
-      if (s.deploymentStartTime && s.deploymentEndTime) {
-        const duration = new Date(s.deploymentEndTime).getTime() - new Date(s.deploymentStartTime).getTime();
-        addDurationToBreakdown(0, duration);
-      }
-
-      // Turns duration
-      s.turns.forEach(t => {
-        if (t.startTime && t.endTime) {
-          const duration = new Date(t.endTime).getTime() - new Date(t.startTime).getTime();
-          addDurationToBreakdown(t.number, duration);
-        }
-      });
     });
 
-    const averageTime = totalGames > 0 ? totalTime / totalGames : 0;
+    const averageTime = timedGamesCount > 0 ? totalTime / timedGamesCount : 0;
 
     const formattedBreakdown = Object.entries(turnBreakdown)
       .map(([num, data]) => ({

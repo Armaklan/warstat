@@ -17,7 +17,7 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
   const deploymentElapsed = useTimer(session.deploymentStartTime, session.deploymentEndTime);
 
   const [editingTurnNumber, setEditingTurnNumber] = useState<number | null>(null);
-  const [isFinishing, setIsFinishing] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(session.isManual && session.status === 'playing');
   const [copied, setCopied] = useState(false);
 
   const handleCopyResult = () => {
@@ -175,9 +175,11 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
             </div>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-1.5 text-base font-mono font-black text-primary-400 leading-none mb-1">
-              <Clock size={16} /> {formatDuration(globalElapsed)}
-            </div>
+            {!session.isManual && (
+              <div className="flex items-center gap-1.5 text-base font-mono font-black text-primary-400 leading-none mb-1">
+                <Clock size={16} /> {formatDuration(globalElapsed)}
+              </div>
+            )}
             <div className="px-1.5 py-0.5 bg-white/10 rounded font-black text-[8px] uppercase tracking-widest inline-block opacity-60">
               {session.status}
             </div>
@@ -233,13 +235,15 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Phase Actuelle</p>
               <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-none">
-                {isFinishing ? 'Fin de partie' : `Tour ${currentTurn.number}`}
+                {isFinishing ? 'Fin de partie' : `Tour ${currentTurn?.number || 1}`}
               </h3>
             </div>
-            <div className="text-right">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Temps du tour</p>
-              <p className="font-mono text-xl font-black text-slate-700 dark:text-slate-300 leading-none">{formatDuration(turnElapsed)}</p>
-            </div>
+            {!session.isManual && (
+              <div className="text-right">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Temps du tour</p>
+                <p className="font-mono text-xl font-black text-slate-700 dark:text-slate-300 leading-none">{formatDuration(turnElapsed)}</p>
+              </div>
+            )}
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">

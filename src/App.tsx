@@ -147,7 +147,11 @@ function App() {
                   )}>
                     {s.status !== 'finished' ? 'En Cours' : (s.result || 'Fini')}
                   </span>
-                  <p className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400">{formatDuration((s.endTime?.getTime() || Date.now()) - new Date(s.startTime).getTime())}</p>
+                  {!s.isManual && (
+                    <p className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400">
+                      {formatDuration((s.endTime?.getTime() || Date.now()) - new Date(s.startTime).getTime())}
+                    </p>
+                  )}
                   <button 
                     onClick={(e) => handleDeleteSession(e, s.id!)}
                     className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1"

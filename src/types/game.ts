@@ -30,6 +30,7 @@ export interface GameSession {
   globalScores: Record<string, ScoreEntry[]>; // playerId -> scores (hors tours)
   status: 'setup' | 'deployment' | 'playing' | 'finished';
   result?: 'victory' | 'defeat' | 'draw';
+  isManual?: boolean;
 }
 
 export interface GameModel {

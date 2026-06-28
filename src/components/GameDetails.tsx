@@ -75,9 +75,11 @@ export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => 
               )}>
                 {session.result || 'Terminé'}
               </div>
-              <div className="flex items-center justify-end gap-1 text-2xl font-mono font-black mt-2 text-primary-400">
-                <Clock size={20} /> {formatDuration(globalElapsed)}
-              </div>
+              {!session.isManual && (
+                <div className="flex items-center justify-end gap-1 text-2xl font-mono font-black mt-2 text-primary-400">
+                  <Clock size={20} /> {formatDuration(globalElapsed)}
+                </div>
+              )}
             </div>
           </div>
 
@@ -113,9 +115,11 @@ export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => 
                   </span>
                   <span className="font-black text-slate-800 dark:text-white">Tour {turn.number}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-mono font-bold">
-                  <Clock size={14} /> {formatDuration(getTurnDuration(turn))}
-                </div>
+                {!session.isManual && (
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-mono font-bold">
+                    <Clock size={14} /> {formatDuration(getTurnDuration(turn))}
+                  </div>
+                )}
               </div>
               
               <div className="p-5 overflow-x-auto">

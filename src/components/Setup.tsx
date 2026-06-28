@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db/database';
 import type { GameSession, Player, GameModel } from '../types/game';
-import { Plus, Trash2, Play, Save } from 'lucide-react';
+import { Plus, Trash2, Play, Save, CheckCircle2 } from 'lucide-react';
 import { Autocomplete } from './Autocomplete';
 import { useLiveQuery } from 'dexie-react-hooks';
 
@@ -14,6 +14,9 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
   const [scenarios, setScenarios] = useState<string[]>(['']);
   const [opponents, setOpponents] = useState<string[]>(['']);
   
+  const [isFinished, setIsFinished] = useState(false);
+  const [gameDate, setGameDate] = useState(new Date().toISOString().split('T')[0]);
+
   // Model state
   const [turnCategories, setTurnCategories] = useState<string[]>(['Scoring']);
   const [globalCategories, setGlobalCategories] = useState<string[]>([]);
@@ -93,7 +96,7 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
 
     const initialGlobalScores = players.reduce((acc, p) => ({ 
       ...acc, 
-      [p.id]: gCats.map(cat => ({ category: cat, points: 0 }))
+      [p.id]: (gCats.length > 0 ? gCats : (isFinished ? ['Score Final'] : [])).map(cat => ({ category: cat, points: 0 }))
     }), {});
 
     const hasCategories = tCats.length > 0 || gCats.length > 0;
@@ -102,15 +105,16 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
       gameName,
       scenarios: scenarios.filter(s => s.trim()),
       players,
-      startTime: new Date(),
-      createdAt: new Date(),
-      turns: hasCategories ? [{
+      startTime: isFinished ? new Date(gameDate) : new Date(),
+      createdAt: isFinished ? new Date(gameDate) : new Date(),
+      turns: isFinished ? [] : (hasCategories ? [{
         number: 1,
         startTime: new Date(),
         scores: initialTurnScores
-      }] : [],
+      }] : []),
       globalScores: initialGlobalScores,
-      status: hasCategories ? 'playing' : 'setup'
+      status: isFinished ? 'playing' : (hasCategories ? 'playing' : 'setup'),
+      isManual: isFinished
     };
 
     const id = await db.sessions.add(newSession);
@@ -247,12 +251,47 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         </div>
       </div>
 
+      <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input 
+              type="checkbox" 
+              checked={isFinished}
+              onChange={(e) => setIsFinished(e.target.checked)}
+              className="sr-only"
+            />
+            <div className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${
+              isFinished 
+                ? 'bg-primary-500 border-primary-500' 
+                : 'border-slate-300 dark:border-slate-700 group-hover:border-primary-400'
+            }`}>
+              {isFinished && <CheckCircle2 size={16} className="text-white" />}
+            </div>
+          </div>
+          <span className="text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Partie terminée</span>
+        </label>
+
+        {isFinished && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Date de la partie</label>
+              <input 
+                type="date"
+                value={gameDate}
+                onChange={(e) => setGameDate(e.target.value)}
+                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-2 ring-primary-500/20 transition-all"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <button
         onClick={handleStartGame}
         disabled={!gameName.trim()}
         className="w-full py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 transition-all shadow-xl shadow-primary-500/20 active:scale-[0.98]"
       >
-        <Play size={24} fill="currentColor" /> Lancer la partie
+        <Play size={24} fill="currentColor" /> {isFinished ? 'Enregistrer la partie' : 'Lancer la partie'}
       </button>
     </div>
   );
