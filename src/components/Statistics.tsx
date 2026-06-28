@@ -2,12 +2,13 @@ import React, {useMemo, useState} from 'react';
 import {useLiveQuery} from 'dexie-react-hooks';
 import {db} from '../db/database';
 import {formatDuration} from '../utils/utils';
-import {BarChart2, Clock, Hash, PieChart, Users} from 'lucide-react';
+import {BarChart2, Clock, Hash, PieChart, Users, Shield} from 'lucide-react';
 
 export const Statistics: React.FC = () => {
   const allSessions = useLiveQuery(() => db.sessions.toArray());
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [selectedOpponent, setSelectedOpponent] = useState<string>('all');
+  const [selectedArmy, setSelectedArmy] = useState<string>('all');
 
   const stats = useMemo(() => {
     if (!allSessions) return null;
@@ -26,9 +27,20 @@ export const Statistics: React.FC = () => {
       s.players.filter(p => !p.isMe).map(p => p.name)
     )));
 
+    // Get unique armies for the selected game(s) (only those I played)
+    const armies = Array.from(new Set(filtered.flatMap(s => 
+      s.players.filter(p => p.isMe).map(p => p.army).filter(Boolean) as string[]
+    )));
+
     if (selectedOpponent !== 'all') {
       filtered = filtered.filter(s => 
         s.players.some(p => !p.isMe && p.name === selectedOpponent)
+      );
+    }
+
+    if (selectedArmy !== 'all') {
+      filtered = filtered.filter(s => 
+        s.players.some(p => p.isMe && p.army === selectedArmy)
       );
     }
 
@@ -119,12 +131,13 @@ export const Statistics: React.FC = () => {
       drawRate: totalGames > 0 ? (draws / totalGames) * 100 : 0,
       games,
       opponents,
+      armies,
       turnBreakdown: formattedBreakdown,
       globalMaxTurnDuration: Math.max(0, ...formattedBreakdown.map(b => b.max)),
       gamesByMonth: formattedMonths,
       maxGamesInMonth
     };
-  }, [allSessions, selectedGame, selectedOpponent]);
+  }, [allSessions, selectedGame, selectedOpponent, selectedArmy]);
 
   if (!stats) return <div className="p-8 text-center">Chargement...</div>;
 
@@ -134,14 +147,18 @@ export const Statistics: React.FC = () => {
         <h2 className="text-2xl font-black text-slate-800 dark:text-white">Statistiques</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 ${selectedGame !== 'all' ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
         <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
             <PieChart size={12} /> Jeu
           </label>
           <select 
             value={selectedGame}
-            onChange={(e) => { setSelectedGame(e.target.value); setSelectedOpponent('all'); }}
+            onChange={(e) => { 
+              setSelectedGame(e.target.value); 
+              setSelectedOpponent('all'); 
+              setSelectedArmy('all');
+            }}
             className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-3 py-2 font-bold text-slate-800 dark:text-white focus:ring-2 ring-primary-500 transition-all outline-none"
           >
             <option value="all">Tous les jeux</option>
@@ -162,6 +179,22 @@ export const Statistics: React.FC = () => {
             {stats.opponents.map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         </div>
+
+        {selectedGame !== 'all' && (
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+              <Shield size={12} /> Armée
+            </label>
+            <select 
+              value={selectedArmy}
+              onChange={(e) => setSelectedArmy(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-3 py-2 font-bold text-slate-800 dark:text-white focus:ring-2 ring-primary-500 transition-all outline-none"
+            >
+              <option value="all">Toutes les armées</option>
+              {stats.armies.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4">

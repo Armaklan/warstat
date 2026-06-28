@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../db/database';
 import type { GameSession, Player, GameModel } from '../types/game';
 import { Plus, Trash2, Play, Save, CheckCircle2 } from 'lucide-react';
@@ -11,8 +11,10 @@ interface SetupProps {
 
 export const Setup: React.FC<SetupProps> = ({ onStart }) => {
   const [gameName, setGameName] = useState('');
+  const [myArmy, setMyArmy] = useState('');
   const [scenarios, setScenarios] = useState<string[]>(['']);
   const [opponents, setOpponents] = useState<string[]>(['']);
+  const [opponentArmies, setOpponentArmies] = useState<string[]>(['']);
   
   const [isFinished, setIsFinished] = useState(false);
   const [gameDate, setGameDate] = useState(new Date().toISOString().split('T')[0]);
@@ -25,9 +27,22 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
   const sessions = useLiveQuery(() => db.sessions.toArray()) || [];
   const models = useLiveQuery(() => db.gameModels.toArray()) || [];
 
-  const gameOptions = Array.from(new Set(sessions.map(s => s.gameName)));
-  const scenarioOptions = Array.from(new Set(sessions.flatMap(s => s.scenarios)));
-  const opponentOptions = Array.from(new Set(sessions.flatMap(s => s.players).filter(p => !p.isMe).map(p => p.name)));
+  const gameOptions = useMemo(() => Array.from(new Set(sessions.map(s => s.gameName))), [sessions]);
+  
+  const scenarioOptions = useMemo(() => {
+    const relevantSessions = gameName ? sessions.filter(s => s.gameName === gameName) : sessions;
+    return Array.from(new Set(relevantSessions.flatMap(s => s.scenarios)));
+  }, [sessions, gameName]);
+
+  const opponentOptions = useMemo(() => {
+    const relevantSessions = gameName ? sessions.filter(s => s.gameName === gameName) : sessions;
+    return Array.from(new Set(relevantSessions.flatMap(s => s.players).filter(p => !p.isMe).map(p => p.name)));
+  }, [sessions, gameName]);
+
+  const armyOptions = useMemo(() => {
+    const relevantSessions = gameName ? sessions.filter(s => s.gameName === gameName) : sessions;
+    return Array.from(new Set(relevantSessions.flatMap(s => s.players).map(p => p.army).filter(Boolean) as string[]));
+  }, [sessions, gameName]);
 
   useEffect(() => {
     const model = models.find(m => m.gameName === gameName);
@@ -45,12 +60,23 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
     setScenarios(newScenarios);
   };
 
-  const handleAddOpponent = () => setOpponents([...opponents, '']);
-  const handleRemoveOpponent = (index: number) => setOpponents(opponents.filter((_, i) => i !== index));
+  const handleAddOpponent = () => {
+    setOpponents([...opponents, '']);
+    setOpponentArmies([...opponentArmies, '']);
+  };
+  const handleRemoveOpponent = (index: number) => {
+    setOpponents(opponents.filter((_, i) => i !== index));
+    setOpponentArmies(opponentArmies.filter((_, i) => i !== index));
+  };
   const handleOpponentChange = (index: number, value: string) => {
     const newOpponents = [...opponents];
     newOpponents[index] = value;
     setOpponents(newOpponents);
+  };
+  const handleOpponentArmyChange = (index: number, value: string) => {
+    const newArmies = [...opponentArmies];
+    newArmies[index] = value;
+    setOpponentArmies(newArmies);
   };
 
   const handleSaveModel = async () => {
@@ -77,10 +103,10 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
     if (!gameName.trim()) return;
 
     const players: Player[] = [
-      { id: 'me', name: 'Moi', isMe: true },
+      { id: 'me', name: 'Moi', isMe: true, army: myArmy },
       ...opponents
         .filter(name => name.trim())
-        .map((name, i) => ({ id: `opp-${i}`, name, isMe: false }))
+        .map((name, i) => ({ id: `opp-${i}`, name, isMe: false, army: opponentArmies[i] }))
     ];
 
     const model = models.find(m => m.gameName === gameName);
@@ -143,6 +169,16 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
           >
             {showModelConfig ? "Masquer la configuration du modèle" : "Configurer les catégories par défaut (Modèle)"}
           </button>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Mon armée</label>
+          <Autocomplete
+            value={myArmy}
+            onChange={setMyArmy}
+            options={armyOptions}
+            placeholder="ex: Space Marines"
+          />
         </div>
 
         {showModelConfig && (
@@ -224,21 +260,33 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
 
         <div className="space-y-3 pt-2">
           <label className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Adversaires</label>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {opponents.map((o, i) => (
-              <div key={i} className="flex gap-2 group">
-                <Autocomplete
-                  value={o}
-                  onChange={(val) => handleOpponentChange(i, val)}
-                  options={opponentOptions}
-                  placeholder={`Nom de l'adversaire ${i + 1}`}
-                  className="p-3 text-sm rounded-xl"
-                />
+              <div key={i} className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50 relative group">
                 {opponents.length > 1 && (
-                  <button onClick={() => handleRemoveOpponent(i)} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                    <Trash2 size={20} />
+                  <button 
+                    onClick={() => handleRemoveOpponent(i)} 
+                    className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-slate-300 hover:text-red-500 transition-colors shadow-sm z-10 opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 )}
+                <div className="grid grid-cols-2 gap-2">
+                  <Autocomplete
+                    value={o}
+                    onChange={(val) => handleOpponentChange(i, val)}
+                    options={opponentOptions}
+                    placeholder="Nom"
+                    className="p-3 text-sm rounded-xl"
+                  />
+                  <Autocomplete
+                    value={opponentArmies[i] || ''}
+                    onChange={(val) => handleOpponentArmyChange(i, val)}
+                    options={armyOptions}
+                    placeholder="Armée"
+                    className="p-3 text-sm rounded-xl"
+                  />
+                </div>
               </div>
             ))}
           </div>

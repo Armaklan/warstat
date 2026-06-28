@@ -88,7 +88,10 @@ export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => 
               <div key={p.id} className="bg-white/5 p-4 rounded-2xl border border-white/5">
                 <div className="flex items-center gap-2 mb-1">
                   <User size={12} className={p.isMe ? "text-blue-400" : "text-red-400"} />
-                  <span className="text-[10px] font-black uppercase opacity-40 tracking-widest">{p.name}</span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase opacity-40 tracking-widest leading-none">{p.name}</span>
+                    {p.army && <span className="text-[8px] font-bold opacity-30 uppercase tracking-tighter mt-0.5">{p.army}</span>}
+                  </div>
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-black">{calculateTotal(p.id)}</span>
