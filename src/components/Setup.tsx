@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../db/database';
 import type { GameSession, Player, GameModel } from '../types/game';
-import { Plus, Trash2, Play, Save, CheckCircle2 } from 'lucide-react';
+import { Play, CheckCircle2 } from 'lucide-react';
 import { Autocomplete } from './Autocomplete';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Button } from './ui/Button';
 import { Input, Label } from './ui/Input';
 import { Typography } from './ui/Typography';
-import { Card } from './ui/Card';
+import { ModelConfigCard } from './setup/ModelConfigCard';
+import { ScenarioField } from './setup/ScenarioField';
+import { OpponentField } from './setup/OpponentField';
 
 interface SetupProps {
   onStart: (sessionId: number) => void;
@@ -186,144 +188,33 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         </div>
 
         {showModelConfig && (
-          <Card className="p-4 bg-slate-50 dark:bg-slate-800/50 space-y-4">
-            <div className="space-y-2">
-              <Label>Catégories par tour</Label>
-              {turnCategories.map((cat, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={cat}
-                    onChange={(e) => {
-                      const newCats = [...turnCategories];
-                      newCats[i] = e.target.value;
-                      setTurnCategories(newCats);
-                    }}
-                    className="flex-1 p-2 text-xs"
-                  />
-                  <Button variant="danger" size="icon" onClick={() => setTurnCategories(turnCategories.filter((_, idx) => idx !== i))}>
-                    <Trash2 size={16}/>
-                  </Button>
-                </div>
-              ))}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setTurnCategories([...turnCategories, ''])}
-                className="text-primary-500 lowercase normal-case font-bold"
-              >
-                <Plus size={14}/> Ajouter une catégorie
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Label>Catégories de fin de partie</Label>
-              {globalCategories.map((cat, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={cat}
-                    onChange={(e) => {
-                      const newCats = [...globalCategories];
-                      newCats[i] = e.target.value;
-                      setGlobalCategories(newCats);
-                    }}
-                    className="flex-1 p-2 text-xs"
-                  />
-                  <Button variant="danger" size="icon" onClick={() => setGlobalCategories(globalCategories.filter((_, idx) => idx !== i))}>
-                    <Trash2 size={16}/>
-                  </Button>
-                </div>
-              ))}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setGlobalCategories([...globalCategories, ''])}
-                className="text-primary-500 lowercase normal-case font-bold"
-              >
-                <Plus size={14}/> Ajouter une catégorie de fin de partie
-              </Button>
-            </div>
-            <Button 
-              onClick={handleSaveModel}
-              className="w-full text-xs"
-              variant="primary"
-            >
-              <Save size={16}/> Enregistrer le modèle
-            </Button>
-          </Card>
+          <ModelConfigCard 
+            turnCategories={turnCategories}
+            setTurnCategories={setTurnCategories}
+            globalCategories={globalCategories}
+            setGlobalCategories={setGlobalCategories}
+            onSaveModel={handleSaveModel}
+          />
         )}
 
-        <div className="space-y-3">
-          <Label>Scénarios</Label>
-          <div className="space-y-2">
-            {scenarios.map((s, i) => (
-              <div key={i} className="flex gap-2 group">
-                <Autocomplete
-                  value={s}
-                  onChange={(val) => handleScenarioChange(i, val)}
-                  options={scenarioOptions}
-                  placeholder={`Scénario ${i + 1}`}
-                  className="p-3 text-sm rounded-xl"
-                />
-                {scenarios.length > 1 && (
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveScenario(i)} className="text-slate-300 hover:text-red-500">
-                    <Trash2 size={20} />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={handleAddScenario} 
-            className="text-primary-600 dark:text-primary-400 lowercase normal-case font-bold"
-          >
-            <Plus size={16} /> Ajouter un scénario
-          </Button>
-        </div>
+        <ScenarioField 
+          scenarios={scenarios}
+          scenarioOptions={scenarioOptions}
+          onScenarioChange={handleScenarioChange}
+          onAddScenario={handleAddScenario}
+          onRemoveScenario={handleRemoveScenario}
+        />
 
-        <div className="space-y-3 pt-2">
-          <Label>Adversaires</Label>
-          <div className="space-y-3">
-            {opponents.map((o, i) => (
-              <Card key={i} className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/30 relative group rounded-2xl">
-                {opponents.length > 1 && (
-                  <button 
-                    onClick={() => handleRemoveOpponent(i)} 
-                    className="absolute -top-2 -right-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-slate-300 hover:text-red-500 transition-colors shadow-sm z-10 opacity-0 group-hover:opacity-100"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-                <div className="grid grid-cols-2 gap-2">
-                  <Autocomplete
-                    value={o}
-                    onChange={(val) => handleOpponentChange(i, val)}
-                    options={opponentOptions}
-                    placeholder="Nom"
-                    className="p-3 text-sm rounded-xl"
-                  />
-                  <Autocomplete
-                    value={opponentArmies[i] || ''}
-                    onChange={(val) => handleOpponentArmyChange(i, val)}
-                    options={armyOptions}
-                    placeholder="Armée"
-                    className="p-3 text-sm rounded-xl"
-                  />
-                </div>
-              </Card>
-            ))}
-          </div>
-          <Button 
-            variant="ghost"
-            size="sm"
-            onClick={handleAddOpponent} 
-            className="text-primary-600 dark:text-primary-400 lowercase normal-case font-bold"
-          >
-            <Plus size={16} /> Ajouter un adversaire
-          </Button>
-        </div>
+        <OpponentField 
+          opponents={opponents}
+          opponentArmies={opponentArmies}
+          opponentOptions={opponentOptions}
+          armyOptions={armyOptions}
+          onOpponentChange={handleOpponentChange}
+          onOpponentArmyChange={handleOpponentArmyChange}
+          onAddOpponent={handleAddOpponent}
+          onRemoveOpponent={handleRemoveOpponent}
+        />
       </div>
 
       <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">

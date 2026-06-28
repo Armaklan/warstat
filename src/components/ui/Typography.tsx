@@ -18,7 +18,7 @@ export const Typography = ({
     mono: 'font-mono font-bold',
   };
 
-  const Component = variant.startsWith('h') ? (variant as keyof JSX.IntrinsicElements) : 'span';
+  const Component = (variant.startsWith('h') ? variant : 'span') as any;
 
   return (
     <Component

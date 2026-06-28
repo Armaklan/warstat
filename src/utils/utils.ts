@@ -65,3 +65,12 @@ export function formatSessionResults(session: GameSession): string {
 
   return results.join('\n');
 }
+
+export function calculatePlayerTotal(session: GameSession, playerId: string): number {
+  const turnPoints = (session.turns || []).reduce((sum, turn) => {
+    const playerScores = turn.scores[playerId] || [];
+    return sum + playerScores.reduce((s, e) => s + e.points, 0);
+  }, 0);
+  const globalPoints = (session.globalScores?.[playerId] || []).reduce((s, e) => s + e.points, 0);
+  return turnPoints + globalPoints;
+}
