@@ -11,22 +11,28 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Warstat',
         short_name: 'Warstat',
         description: 'Suivi de scores et temps pour jeux de guerre',
-        theme_color: '#ffffff',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
+        display: 'standalone',
+        scope: './',
+        start_url: './index.html',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: 'favicon.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'any'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'favicon.svg',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/svg+xml',
+            purpose: 'maskable'
           }
         ]
       }

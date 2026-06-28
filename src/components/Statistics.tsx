@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/database';
-import { formatDuration, cn } from '../utils/utils';
-import { BarChart2, PieChart, Users, Clock, Hash, ChevronLeft } from 'lucide-react';
+import React, {useMemo, useState} from 'react';
+import {useLiveQuery} from 'dexie-react-hooks';
+import {db} from '../db/database';
+import {formatDuration} from '../utils/utils';
+import {BarChart2, Clock, Hash, PieChart, Users} from 'lucide-react';
 
 interface StatisticsProps {
   onBack: () => void;
