@@ -5,14 +5,16 @@ import { Setup } from './components/Setup';
 import { Game } from './components/Game';
 import { GameDetails } from './components/GameDetails';
 import { Statistics } from './components/Statistics';
+import { Settings } from './components/Settings';
 import { AddCategoryForm } from './components/AddCategoryForm';
-import { History as HistoryIcon, PlusCircle, ChevronRight, PlayCircle, Trash2, Sun, Moon, BarChart3 } from 'lucide-react';
+import { History as HistoryIcon, PlusCircle, ChevronRight, PlayCircle, Trash2, Sun, Moon, BarChart3, Settings as SettingsIcon } from 'lucide-react';
 import { formatDuration, cn } from './utils/utils';
 
 function App() {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [viewingSessionId, setViewingSessionId] = useState<number | null>(null);
   const [showStatistics, setShowStatistics] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -77,14 +79,6 @@ function App() {
     );
   }
 
-  if (showStatistics) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors">
-        <Statistics onBack={() => setShowStatistics(false)} />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-16 transition-colors">
       <header className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-4 shadow-sm mb-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
@@ -100,7 +94,11 @@ function App() {
         </button>
       </header>
 
-      {showHistory ? (
+      {showSettings ? (
+        <Settings />
+      ) : showStatistics ? (
+        <Statistics />
+      ) : showHistory ? (
         <div className="p-4 max-w-2xl mx-auto space-y-4">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-black text-slate-800 dark:text-white">Historique</h2>
@@ -170,25 +168,32 @@ function App() {
 
       <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 flex justify-around py-2 rounded-2xl shadow-2xl z-50">
         <button 
-          onClick={() => { setShowHistory(false); setActiveSessionId(null); setViewingSessionId(null); setShowStatistics(false); }}
-          className={`flex flex-col items-center gap-0.5 transition-all ${!showHistory && !viewingSessionId && !showStatistics ? 'text-primary-600 scale-105' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+          onClick={() => { setShowHistory(false); setActiveSessionId(null); setViewingSessionId(null); setShowStatistics(false); setShowSettings(false); }}
+          className={`flex flex-col items-center gap-0.5 transition-all ${!showHistory && !viewingSessionId && !showStatistics && !showSettings ? 'text-primary-600 scale-105' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
         >
           <PlusCircle size={20} />
           <span className="text-[8px] font-black uppercase tracking-tighter">Nouvelle</span>
         </button>
         <button 
-          onClick={() => { setShowHistory(true); setViewingSessionId(null); setShowStatistics(false); }}
+          onClick={() => { setShowHistory(true); setViewingSessionId(null); setShowStatistics(false); setShowSettings(false); }}
           className={`flex flex-col items-center gap-0.5 transition-all ${showHistory || viewingSessionId ? 'text-primary-600 scale-105' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
         >
           <HistoryIcon size={20} />
           <span className="text-[8px] font-black uppercase tracking-tighter">Historique</span>
         </button>
         <button 
-          onClick={() => { setShowStatistics(true); setShowHistory(false); setViewingSessionId(null); }}
+          onClick={() => { setShowStatistics(true); setShowHistory(false); setViewingSessionId(null); setShowSettings(false); }}
           className={`flex flex-col items-center gap-0.5 transition-all ${showStatistics ? 'text-primary-600 scale-105' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
         >
           <BarChart3 size={20} />
           <span className="text-[8px] font-black uppercase tracking-tighter">Statistique</span>
+        </button>
+        <button 
+          onClick={() => { setShowStatistics(false); setShowHistory(false); setViewingSessionId(null); setShowSettings(true); }}
+          className={`flex flex-col items-center gap-0.5 transition-all ${showSettings ? 'text-primary-600 scale-105' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+        >
+          <SettingsIcon size={20} />
+          <span className="text-[8px] font-black uppercase tracking-tighter">Paramètres</span>
         </button>
       </nav>
     </div>

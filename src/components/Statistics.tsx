@@ -4,11 +4,7 @@ import {db} from '../db/database';
 import {formatDuration} from '../utils/utils';
 import {BarChart2, Clock, Hash, PieChart, Users} from 'lucide-react';
 
-interface StatisticsProps {
-  onBack: () => void;
-}
-
-export const Statistics: React.FC<StatisticsProps> = ({ onBack }) => {
+export const Statistics: React.FC = () => {
   const allSessions = useLiveQuery(() => db.sessions.toArray());
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [selectedOpponent, setSelectedOpponent] = useState<string>('all');
@@ -111,12 +107,6 @@ export const Statistics: React.FC<StatisticsProps> = ({ onBack }) => {
     <div className="p-4 space-y-6 max-w-2xl mx-auto pb-24">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-black text-slate-800 dark:text-white">Statistiques</h2>
-        <button 
-          onClick={onBack} 
-          className="px-4 py-2 text-sm font-bold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-        >
-          Retour
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
