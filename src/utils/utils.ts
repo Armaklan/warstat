@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { GameSession } from '../types/game';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,4 +18,50 @@ export function formatDuration(ms: number): string {
   ].filter(Boolean);
 
   return parts.join(':');
+}
+
+export function formatSessionResults(session: GameSession): string {
+  const results: string[] = [];
+  results.push(`Résultats Warstat - ${session.gameName}`);
+  results.push(`Date : ${new Date(session.startTime).toLocaleDateString()}`);
+  results.push('');
+
+  session.players.forEach(player => {
+    results.push(`${player.name} :`);
+    
+    const categories: Record<string, number> = {};
+    
+    // Points des tours
+    if (session.turns) {
+      session.turns.forEach(turn => {
+        const playerScores = turn.scores[player.id] || [];
+        playerScores.forEach(score => {
+          categories[score.category] = (categories[score.category] || 0) + score.points;
+        });
+      });
+    }
+    
+    // Points globaux (hors tours)
+    const globalScores = (session.globalScores && session.globalScores[player.id]) || [];
+    globalScores.forEach(score => {
+      categories[score.category] = (categories[score.category] || 0) + score.points;
+    });
+
+    let total = 0;
+    Object.entries(categories).forEach(([category, points]) => {
+      results.push(`  - ${category} : ${points}`);
+      total += points;
+    });
+    
+    results.push(`  TOTAL : ${total}`);
+    results.push('');
+  });
+
+  if (session.result) {
+    const resultText = session.result === 'victory' ? 'VICTOIRE' : 
+                       session.result === 'defeat' ? 'DÉFAITE' : 'MATCH NUL';
+    results.push(`Résultat final : ${resultText}`);
+  }
+
+  return results.join('\n');
 }

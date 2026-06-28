@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GameSession, Turn } from '../types/game';
-import { formatDuration, cn } from '../utils/utils';
-import { Clock, History, ChevronLeft, Calendar, User, Trophy, Layout } from 'lucide-react';
+import { formatDuration, cn, formatSessionResults } from '../utils/utils';
+import { Clock, History, ChevronLeft, Calendar, User, Trophy, Layout, Copy } from 'lucide-react';
 
 interface GameDetailsProps {
   session: GameSession;
@@ -9,7 +9,15 @@ interface GameDetailsProps {
 }
 
 export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => {
+  const [copied, setCopied] = React.useState(false);
   const globalElapsed = (session.endTime?.getTime() || Date.now()) - new Date(session.startTime).getTime();
+
+  const handleCopyResult = () => {
+    const resultText = formatSessionResults(session);
+    navigator.clipboard.writeText(resultText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const calculateTotal = (playerId: string) => {
     const turnPoints = session.turns.reduce((sum, turn) => {
@@ -28,12 +36,21 @@ export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => 
 
   return (
     <div className="p-4 space-y-6 max-w-2xl mx-auto pb-24">
-      <button 
-        onClick={onBack} 
-        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-      >
-        <ChevronLeft size={20} /> Retour
-      </button>
+      <div className="flex justify-between items-center">
+        <button 
+          onClick={onBack} 
+          className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-bold hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        >
+          <ChevronLeft size={20} /> Retour
+        </button>
+        <button 
+          onClick={handleCopyResult}
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+        >
+          <Copy size={14} />
+          {copied ? 'Copié !' : 'Copier'}
+        </button>
+      </div>
 
       <div className="bg-slate-900 dark:bg-slate-900 text-white p-6 rounded-3xl shadow-2xl relative overflow-hidden border border-slate-800">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>

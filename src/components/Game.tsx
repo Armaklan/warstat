@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {db} from '../db/database';
 import type {GameSession, Turn} from '../types/game';
-import {cn, formatDuration} from '../utils/utils';
+import {cn, formatDuration, formatSessionResults} from '../utils/utils';
 import {useTimer} from '../hooks/useTimer';
-import {CheckCircle, Clock, Edit2, History, Play, Plus, SkipForward, User} from 'lucide-react';
+import {CheckCircle, Clock, Copy, Edit2, History, Play, Plus, SkipForward, User} from 'lucide-react';
 
 interface GameProps {
   session: GameSession;
@@ -18,6 +18,14 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
 
   const [editingTurnNumber, setEditingTurnNumber] = useState<number | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyResult = () => {
+    const resultText = formatSessionResults(session);
+    navigator.clipboard.writeText(resultText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const calculateTotal = (playerId: string) => {
     const turnPoints = session.turns.reduce((sum, turn) => {
@@ -419,18 +427,27 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
             session.result === 'victory' ? "bg-green-600 text-white" :
             session.result === 'defeat' ? "bg-red-600 text-white" : "bg-slate-700 text-white"
           )}>
-            <div className="absolute top-0 left-0 w-full h-full bg-white/10 opacity-20 -rotate-12 translate-y-20 translate-x-20 rounded-3xl"></div>
-            <p className="text-xs uppercase font-black tracking-[0.3em] mb-4 opacity-70">Résultat de la Partie</p>
-            <h2 className="text-6xl font-black mb-4 tracking-tighter italic">
-              {session.result === 'victory' ? 'VICTOIRE' :
-               session.result === 'defeat' ? 'DÉFAITE' : 'MATCH NUL'}
-            </h2>
-            <div className="h-px bg-white/20 w-24 mx-auto mb-6"></div>
-            <p className="text-4xl font-mono font-black flex items-center justify-center gap-4">
-              <span>{calculateTotal('me')}</span>
-              <span className="text-lg opacity-40">vs</span>
-              <span>{Math.max(...session.players.filter(p => !p.isMe).map(p => calculateTotal(p.id)))}</span>
-            </p>
+            <div className="absolute top-0 left-0 w-full h-full bg-white/10 opacity-20 -rotate-12 translate-y-20 translate-x-20 rounded-3xl pointer-events-none"></div>
+            <div className="relative z-10">
+              <p className="text-xs uppercase font-black tracking-[0.3em] mb-4 opacity-70">Résultat de la Partie</p>
+              <h2 className="text-6xl font-black mb-4 tracking-tighter italic">
+                {session.result === 'victory' ? 'VICTOIRE' :
+                 session.result === 'defeat' ? 'DÉFAITE' : 'MATCH NUL'}
+              </h2>
+              <div className="h-px bg-white/20 w-24 mx-auto mb-6"></div>
+              <p className="text-4xl font-mono font-black flex items-center justify-center gap-4">
+                <span>{calculateTotal('me')}</span>
+                <span className="text-lg opacity-40">vs</span>
+                <span>{Math.max(...session.players.filter(p => !p.isMe).map(p => calculateTotal(p.id)))}</span>
+              </p>
+              <button 
+                onClick={handleCopyResult}
+                className="mt-6 flex items-center gap-2 mx-auto bg-white/20 hover:bg-white/30 transition-colors px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest"
+              >
+                <Copy size={12} />
+                {copied ? 'Copié !' : 'Copier le résultat'}
+              </button>
+            </div>
           </div>
           <button 
             onClick={() => window.location.reload()} 
