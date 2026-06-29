@@ -154,7 +154,8 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
         scores: initialTurnScores
       }] : []),
       globalScores: initialGlobalScores,
-      status: isFinished ? 'playing' : (hasCategories ? 'playing' : 'setup'),
+      status: isFinished ? 'playing' : 'deployment',
+      deploymentStartTime: isFinished ? undefined : new Date(),
       isManual: isFinished,
       scenarioDetails
     };

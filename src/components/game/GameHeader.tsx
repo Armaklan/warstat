@@ -52,7 +52,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ session, globalElapsed, 
             )}
           </div>
           <Badge className="bg-white/10 opacity-60">
-            {session.status}
+            {session.status === 'deployment' ? 'Déploiement' : 
+             session.status === 'playing' ? 'En cours' : 
+             session.status === 'setup' ? 'Configuration' : 'Terminé'}
           </Badge>
         </div>
       </div>

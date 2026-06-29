@@ -66,15 +66,33 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
   };
 
   const handleStartTurns = async () => {
-    const firstTurn: Turn = {
-      number: 1,
-      startTime: new Date(),
-      scores: session.players.reduce((acc, p) => ({ ...acc, [p.id]: [{ category: 'Scoring', points: 0 }] }), {})
-    };
+    let updatedTurns = [...session.turns];
+    
+    if (updatedTurns.length > 0) {
+      // Si on a déjà des tours (initialisés au setup), on met à jour le startTime du premier tour
+      updatedTurns[0] = {
+        ...updatedTurns[0],
+        startTime: new Date()
+      };
+    } else {
+      // Sinon on crée le premier tour à partir du modèle ou par défaut
+      const model = await db.gameModels.where('gameName').equalsIgnoreCase(session.gameName).first();
+      const tCats = model?.turnCategories || ['Scoring'];
+      
+      updatedTurns = [{
+        number: 1,
+        startTime: new Date(),
+        scores: session.players.reduce((acc, p) => ({ 
+          ...acc, 
+          [p.id]: tCats.map(cat => ({ category: cat, points: 0 }))
+        }), {})
+      }];
+    }
+
     await db.sessions.update(session.id!, {
       status: 'playing',
       deploymentEndTime: new Date(),
-      turns: [firstTurn]
+      turns: updatedTurns
     });
   };
 
