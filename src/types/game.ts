@@ -49,3 +49,8 @@ export interface GameModel {
   turnCategories: string[];
   globalCategories: string[];
 }
+
+export interface AppSettings {
+  id?: string;
+  autoSaveFileHandle?: any;
+}

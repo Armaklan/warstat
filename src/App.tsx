@@ -9,8 +9,10 @@ import { Settings } from './components/Settings';
 import { AddCategoryForm } from './components/AddCategoryForm';
 import { History as HistoryIcon, PlusCircle, ChevronRight, PlayCircle, Trash2, Sun, Moon, BarChart3, Settings as SettingsIcon } from 'lucide-react';
 import { formatDuration, cn } from './utils/utils';
+import { useAutoSave } from './hooks/useAutoSave';
 
 function App() {
+  useAutoSave();
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [viewingSessionId, setViewingSessionId] = useState<number | null>(null);
   const [showStatistics, setShowStatistics] = useState(false);

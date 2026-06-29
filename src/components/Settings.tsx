@@ -1,35 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../db/database';
-import { Trash2, Download, Upload, AlertTriangle } from 'lucide-react';
+import { Trash2, Download, Upload, AlertTriangle, FileCheck, ShieldAlert } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Typography } from './ui/Typography';
+import { exportToJSON, saveToFileHandle } from '../utils/export';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 export const Settings: React.FC = () => {
+  const settings = useLiveQuery(() => db.settings.get('main'));
+  const [isFileSystemApiSupported] = useState(() => 'showSaveFilePicker' in window);
+
   const handleExport = async () => {
     try {
-      const sessions = await db.sessions.toArray();
-      const gameModels = await db.gameModels.toArray();
-      const data = {
-        sessions,
-        gameModels,
-        exportDate: new Date().toISOString(),
-        version: 1
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `warstat-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      await exportToJSON();
     } catch (error) {
       console.error('Export failed:', error);
       alert('Erreur lors de l\'exportation des données.');
     }
+  };
+
+  const handleSetupAutoSave = async () => {
+    try {
+      // @ts-ignore
+      const handle = await window.showSaveFilePicker({
+        suggestedName: `warstat-autosave.json`,
+        types: [{
+          description: 'JSON Files',
+          accept: { 'application/json': ['.json'] },
+        }],
+      });
+
+      await db.settings.put({ id: 'main', autoSaveFileHandle: handle });
+      
+      // Test immédiat de sauvegarde pour valider les permissions
+      await saveToFileHandle(handle);
+      alert('Sauvegarde automatique configurée avec succès !');
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Auto-save setup failed:', error);
+        alert('Erreur lors de la configuration de la sauvegarde automatique.');
+      }
+    }
+  };
+
+  const handleDisableAutoSave = async () => {
+    await db.settings.update('main', { autoSaveFileHandle: null });
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +63,7 @@ export const Settings: React.FC = () => {
         }
 
         if (confirm('L\'importation va fusionner les données avec vos données actuelles. Continuer ?')) {
-          await db.transaction('rw', db.sessions, db.gameModels, async () => {
+          await db.transaction('rw', db.sessions, db.gameModels, db.scenarios, async () => {
             // Import sessions
             for (const session of data.sessions) {
               const { id, ...sessionData } = session;
@@ -64,6 +80,16 @@ export const Settings: React.FC = () => {
                 const existing = await db.gameModels.where('gameName').equals(modelData.gameName).first();
                 if (!existing) {
                   await db.gameModels.add(modelData);
+                }
+              }
+            }
+            // Import scenarios if they exist
+            if (data.scenarios && Array.isArray(data.scenarios)) {
+              for (const scenario of data.scenarios) {
+                const { id, ...scenarioData } = scenario;
+                const existing = await db.scenarios.where({ gameName: scenarioData.gameName, name: scenarioData.name }).first();
+                if (!existing) {
+                  await db.scenarios.add(scenarioData);
                 }
               }
             }
@@ -85,6 +111,8 @@ export const Settings: React.FC = () => {
         try {
           await db.sessions.clear();
           await db.gameModels.clear();
+          await db.scenarios.clear();
+          await db.settings.clear();
           alert('Toutes les données ont été supprimées.');
           window.location.reload();
         } catch (error) {
@@ -100,6 +128,49 @@ export const Settings: React.FC = () => {
       <Typography variant="h3" className="mb-6">Paramètres</Typography>
       
       <div className="space-y-4">
+        {isFileSystemApiSupported && (
+          <Card className="p-6">
+            <div className="flex items-center gap-3 mb-4 text-primary-600 dark:text-primary-400">
+              <FileCheck size={24} />
+              <h3 className="text-lg font-bold">Sauvegarde automatique</h3>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mb-4">
+              Sélectionnez un fichier local qui sera mis à jour à chaque fermeture de l'application.
+            </p>
+            {settings?.autoSaveFileHandle ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl border border-green-100 dark:border-green-900/30">
+                  <FileCheck size={18} />
+                  <span className="text-sm font-bold truncate flex-1">
+                    {settings.autoSaveFileHandle.name}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSetupAutoSave} variant="secondary" className="flex-1 py-2 text-xs">
+                    Changer le fichier
+                  </Button>
+                  <Button onClick={handleDisableAutoSave} variant="danger" className="py-2 px-3" size="sm">
+                    Désactiver
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                onClick={handleSetupAutoSave}
+                className="w-full py-3"
+                variant="secondary"
+                size="lg"
+              >
+                Configurer le fichier de sauvegarde
+              </Button>
+            )}
+            <div className="mt-4 flex items-start gap-2 text-[10px] text-slate-500 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg">
+              <ShieldAlert size={14} className="flex-shrink-0 mt-0.5" />
+              <p>Note: Le navigateur pourra demander une autorisation d'écriture lors de la première sauvegarde de chaque session.</p>
+            </div>
+          </Card>
+        )}
+
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-4 text-primary-600 dark:text-primary-400">
             <Download size={24} />
