@@ -49,3 +49,14 @@ export const saveToFileHandle = async (handle: any) => {
     console.error('Échec de la sauvegarde automatique:', error);
   }
 };
+
+export const triggerAutoSave = async () => {
+  try {
+    const settings = await db.settings.get('main');
+    if (settings?.autoSaveFileHandle) {
+      await saveToFileHandle(settings.autoSaveFileHandle);
+    }
+  } catch (error) {
+    console.error('Auto-save error:', error);
+  }
+};

@@ -3,6 +3,7 @@ import {db} from '../db/database';
 import type {GameSession, Turn} from '../types/game';
 import {formatSessionResults, calculatePlayerTotal} from '../utils/utils';
 import {useTimer} from '../hooks/useTimer';
+import { triggerAutoSave } from '../utils/export';
 import { GameHeader } from './game/GameHeader';
 import { PlayerScoreSummary } from './game/PlayerScoreSummary';
 import { GameSetupView } from './game/GameSetupView';
@@ -137,6 +138,8 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
       endTime: new Date(),
       result
     });
+
+    await triggerAutoSave();
   };
 
   const handleQuickScore = async (playerId: string, category: string, delta: number, turnNumber?: number) => {
