@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GameSession, Turn } from '../../types/game';
 import { cn, formatDuration } from '../../utils/utils';
-import { History, Plus, SkipForward, CheckCircle, Edit2 } from 'lucide-react';
+import { History, Plus, SkipForward, CheckCircle, Edit2, ScrollText } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Typography } from '../ui/Typography';
@@ -69,6 +69,38 @@ export const GamePlayingView: React.FC<GamePlayingViewProps> = ({
           </div>
         )}
       </div>
+
+      {session.scenarioDetails && (
+        <Card className="p-3 bg-primary-50/50 dark:bg-primary-900/10 border-primary-100 dark:border-primary-900/20 space-y-3">
+          {typeof session.scenarioDetails === 'string' ? (
+            <div className="flex items-start gap-2">
+              <ScrollText size={16} className="text-primary-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <Typography variant="small-caps" className="text-primary-600 dark:text-primary-400 mb-1 block text-[10px]">Détails du Scénario</Typography>
+                <div className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+                  {session.scenarioDetails}
+                </div>
+              </div>
+            </div>
+          ) : (
+            Object.entries(session.scenarioDetails)
+              .filter(([_, details]) => details?.trim())
+              .map(([sName, details], idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <ScrollText size={16} className="text-primary-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <Typography variant="small-caps" className="text-primary-600 dark:text-primary-400 mb-1 block text-[10px]">
+                      {sName}
+                    </Typography>
+                    <div className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+                      {details}
+                    </div>
+                  </div>
+                </div>
+              ))
+          )}
+        </Card>
+      )}
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">

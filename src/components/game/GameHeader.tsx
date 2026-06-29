@@ -1,7 +1,7 @@
 import React from 'react';
 import type { GameSession } from '../../types/game';
 import { formatDuration } from '../../utils/utils';
-import { Clock, MessageSquare } from 'lucide-react';
+import { Clock, MessageSquare, ScrollText } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Typography } from '../ui/Typography';
@@ -11,9 +11,10 @@ interface GameHeaderProps {
   session: GameSession;
   globalElapsed: number;
   onOpenNotes: () => void;
+  onOpenScenario: () => void;
 }
 
-export const GameHeader: React.FC<GameHeaderProps> = ({ session, globalElapsed, onOpenNotes }) => {
+export const GameHeader: React.FC<GameHeaderProps> = ({ session, globalElapsed, onOpenNotes, onOpenScenario }) => {
   return (
     <Card variant="dark" className="p-4 overflow-hidden">
       <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
@@ -26,6 +27,15 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ session, globalElapsed, 
         </div>
         <div className="flex flex-col items-end gap-1">
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={onOpenScenario}
+              className="hover:bg-white/10 text-primary-400 z-20"
+              aria-label="Scénario"
+            >
+              <ScrollText size={18} />
+            </Button>
             <Button 
               variant="ghost" 
               size="icon"

@@ -33,6 +33,14 @@ export interface GameSession {
   result?: 'victory' | 'defeat' | 'draw';
   isManual?: boolean;
   notes?: string;
+  scenarioDetails?: Record<string, string>;
+}
+
+export interface Scenario {
+  id?: number;
+  gameName: string;
+  name: string;
+  details: string;
 }
 
 export interface GameModel {

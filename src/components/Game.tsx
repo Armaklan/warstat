@@ -10,6 +10,7 @@ import { GameDeploymentView } from './game/GameDeploymentView';
 import { GamePlayingView } from './game/GamePlayingView';
 import { GameFinishedView } from './game/GameFinishedView';
 import { GameNotesView } from './game/GameNotesView';
+import { GameScenarioView } from './game/GameScenarioView';
 
 interface GameProps {
   session: GameSession;
@@ -26,9 +27,28 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
   const [isFinishing, setIsFinishing] = useState(!!session.isManual && session.status === 'playing');
   const [copied, setCopied] = useState(false);
   const [isShowingNotes, setIsShowingNotes] = useState(false);
+  const [isShowingScenario, setIsShowingScenario] = useState(false);
 
   const handleUpdateNotes = async (notes: string) => {
     await db.sessions.update(session.id!, { notes });
+  };
+
+  const handleUpdateScenario = async (scenarioDetails: Record<string, string>) => {
+    await db.sessions.update(session.id!, { scenarioDetails });
+
+    // Also update global scenario details
+    for (const [sName, details] of Object.entries(scenarioDetails)) {
+      const existing = await db.scenarios.where({ gameName: session.gameName, name: sName }).first();
+      if (existing) {
+        await db.scenarios.update(existing.id!, { details });
+      } else {
+        await db.scenarios.add({
+          gameName: session.gameName,
+          name: sName,
+          details
+        });
+      }
+    }
   };
 
   const handleCopyResult = () => {
@@ -149,6 +169,7 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
         session={session} 
         globalElapsed={globalElapsed} 
         onOpenNotes={() => setIsShowingNotes(true)}
+        onOpenScenario={() => setIsShowingScenario(true)}
       />
 
       {isShowingNotes && (
@@ -156,6 +177,15 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
           notes={session.notes || ''} 
           onClose={() => setIsShowingNotes(false)}
           onChange={handleUpdateNotes}
+        />
+      )}
+
+      {isShowingScenario && (
+        <GameScenarioView 
+          scenarios={session.scenarios}
+          details={typeof session.scenarioDetails === 'object' && session.scenarioDetails !== null ? session.scenarioDetails : {}} 
+          onClose={() => setIsShowingScenario(false)}
+          onChange={handleUpdateScenario}
         />
       )}
       

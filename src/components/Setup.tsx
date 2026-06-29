@@ -108,6 +108,15 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
   const handleStartGame = async () => {
     if (!gameName.trim()) return;
 
+    const activeScenarios = scenarios.filter(s => s.trim());
+    const scenarioDetails: Record<string, string> = {};
+    for (const sName of activeScenarios) {
+      const scenario = await db.scenarios.where({ gameName, name: sName }).first();
+      if (scenario) {
+        scenarioDetails[sName] = scenario.details;
+      }
+    }
+
     const players: Player[] = [
       { id: 'me', name: 'Moi', isMe: true, army: myArmy },
       ...opponents
@@ -135,7 +144,7 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
 
     const newSession: GameSession = {
       gameName,
-      scenarios: scenarios.filter(s => s.trim()),
+      scenarios: activeScenarios,
       players,
       startTime: isFinished ? new Date(gameDate) : new Date(),
       createdAt: isFinished ? new Date(gameDate) : new Date(),
@@ -146,7 +155,8 @@ export const Setup: React.FC<SetupProps> = ({ onStart }) => {
       }] : []),
       globalScores: initialGlobalScores,
       status: isFinished ? 'playing' : (hasCategories ? 'playing' : 'setup'),
-      isManual: isFinished
+      isManual: isFinished,
+      scenarioDetails
     };
 
     const id = await db.sessions.add(newSession);
