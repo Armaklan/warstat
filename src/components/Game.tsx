@@ -9,6 +9,7 @@ import { GameSetupView } from './game/GameSetupView';
 import { GameDeploymentView } from './game/GameDeploymentView';
 import { GamePlayingView } from './game/GamePlayingView';
 import { GameFinishedView } from './game/GameFinishedView';
+import { GameNotesView } from './game/GameNotesView';
 
 interface GameProps {
   session: GameSession;
@@ -24,6 +25,11 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
   const [editingTurnNumber, setEditingTurnNumber] = useState<number | null>(null);
   const [isFinishing, setIsFinishing] = useState(!!session.isManual && session.status === 'playing');
   const [copied, setCopied] = useState(false);
+  const [isShowingNotes, setIsShowingNotes] = useState(false);
+
+  const handleUpdateNotes = async (notes: string) => {
+    await db.sessions.update(session.id!, { notes });
+  };
 
   const handleCopyResult = () => {
     const resultText = formatSessionResults(session);
@@ -139,7 +145,19 @@ export const Game: React.FC<GameProps> = ({ session, onAddCategory }) => {
 
   return (
     <div className="p-3 space-y-4 max-w-2xl mx-auto pb-28">
-      <GameHeader session={session} globalElapsed={globalElapsed} />
+      <GameHeader 
+        session={session} 
+        globalElapsed={globalElapsed} 
+        onOpenNotes={() => setIsShowingNotes(true)}
+      />
+
+      {isShowingNotes && (
+        <GameNotesView 
+          notes={session.notes || ''} 
+          onClose={() => setIsShowingNotes(false)}
+          onChange={handleUpdateNotes}
+        />
+      )}
       
       <PlayerScoreSummary session={session} />
 

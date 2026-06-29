@@ -32,6 +32,7 @@ export interface GameSession {
   status: 'setup' | 'deployment' | 'playing' | 'finished';
   result?: 'victory' | 'defeat' | 'draw';
   isManual?: boolean;
+  notes?: string;
 }
 
 export interface GameModel {

@@ -46,7 +46,7 @@ function App() {
   );
 
   const allSessions = useLiveQuery(
-    () => db.sessions.orderBy('startTime').reverse().toArray()
+    () => db.sessions.orderBy('id').reverse().toArray()
   );
 
   const handleDeleteSession = async (e: React.MouseEvent, id: number) => {
