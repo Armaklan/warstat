@@ -12,6 +12,7 @@ export const Statistics: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [selectedOpponent, setSelectedOpponent] = useState<string>('all');
   const [selectedArmy, setSelectedArmy] = useState<string>('all');
+  const [timeUnit, setTimeUnit] = useState<'month' | 'year'>('month');
 
   const stats = useMemo(() => {
     if (!allSessions) return null;
@@ -104,23 +105,27 @@ export const Statistics: React.FC = () => {
       }))
       .sort((a, b) => a.number - b.number);
 
-    // Games by month breakdown
-    const gamesByMonth: Record<string, number> = {};
+    // Games by time breakdown
+    const gamesByTime: Record<string, number> = {};
     filtered.forEach(s => {
       const date = new Date(s.createdAt || s.startTime);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      gamesByMonth[monthKey] = (gamesByMonth[monthKey] || 0) + 1;
+      const key = timeUnit === 'month' 
+        ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        : `${date.getFullYear()}`;
+      gamesByTime[key] = (gamesByTime[key] || 0) + 1;
     });
 
-    const formattedMonths = Object.entries(gamesByMonth)
-      .map(([month, count]) => ({
-        month,
+    const formattedTime = Object.entries(gamesByTime)
+      .map(([key, count]) => ({
+        key,
         count,
-        label: new Date(month + '-02').toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
+        label: timeUnit === 'month'
+          ? new Date(key + '-02').toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
+          : key
       }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+      .sort((a, b) => a.key.localeCompare(b.key));
 
-    const maxGamesInMonth = Math.max(0, ...formattedMonths.map(m => m.count));
+    const maxGamesInPeriod = Math.max(0, ...formattedTime.map(m => m.count));
 
     return {
       totalGames,
@@ -137,10 +142,10 @@ export const Statistics: React.FC = () => {
       armies,
       turnBreakdown: formattedBreakdown,
       globalMaxTurnDuration: Math.max(0, ...formattedBreakdown.map(b => b.max)),
-      gamesByMonth: formattedMonths,
-      maxGamesInMonth
+      gamesByTime: formattedTime,
+      maxGamesInPeriod
     };
-  }, [allSessions, selectedGame, selectedOpponent, selectedArmy]);
+  }, [allSessions, selectedGame, selectedOpponent, selectedArmy, timeUnit]);
 
   if (!stats) return <div className="p-8 text-center">Chargement...</div>;
 
@@ -219,27 +224,48 @@ export const Statistics: React.FC = () => {
       </div>
 
       <Card className="p-6">
-        <Typography variant="small-caps" className="block text-center text-slate-400 text-xs mb-8">Parties par mois</Typography>
-        {stats.gamesByMonth.length > 0 ? (
-          <div className="flex items-end justify-between gap-2 h-32 px-2">
-            {stats.gamesByMonth.map((m) => (
-              <div key={m.month} className="flex-1 flex flex-col items-center gap-2 group relative">
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg relative h-24 flex items-end overflow-hidden">
-                  <div 
-                    style={{ height: `${(m.count / stats.maxGamesInMonth) * 100}%` }}
-                    className="w-full bg-primary-500 rounded-t-lg transition-all duration-500 group-hover:bg-primary-400"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 dark:bg-black/20 pointer-events-none">
-                    <span className="text-[10px] font-black text-slate-800 dark:text-white bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded shadow-sm border border-slate-200 dark:border-slate-800">
-                      {m.count}
-                    </span>
+        <div className="flex justify-between items-center mb-8">
+          <Typography variant="small-caps" className="text-slate-400 text-xs">
+            Parties par {timeUnit === 'month' ? 'mois' : 'année'}
+          </Typography>
+          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+            <button 
+              onClick={() => setTimeUnit('month')}
+              className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${timeUnit === 'month' ? 'bg-white dark:bg-slate-700 text-primary-500 shadow-sm' : 'text-slate-400'}`}
+            >
+              MOIS
+            </button>
+            <button 
+              onClick={() => setTimeUnit('year')}
+              className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${timeUnit === 'year' ? 'bg-white dark:bg-slate-700 text-primary-500 shadow-sm' : 'text-slate-400'}`}
+            >
+              ANNÉE
+            </button>
+          </div>
+        </div>
+
+        {stats.gamesByTime.length > 0 ? (
+          <div className="overflow-x-auto pb-2">
+            <div className="flex items-end gap-2 h-32 px-2 min-w-max">
+              {stats.gamesByTime.map((p) => (
+                <div key={p.key} className="w-12 flex-shrink-0 flex flex-col items-center gap-2 group relative">
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg relative h-24 flex items-end overflow-hidden">
+                    <div 
+                      style={{ height: `${(p.count / stats.maxGamesInPeriod) * 100}%` }}
+                      className="w-full bg-primary-500 rounded-t-lg transition-all duration-500 group-hover:bg-primary-400"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 dark:bg-black/20 pointer-events-none">
+                      <span className="text-[10px] font-black text-slate-800 dark:text-white bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded shadow-sm border border-slate-200 dark:border-slate-800">
+                        {p.count}
+                      </span>
+                    </div>
                   </div>
+                  <span className="text-[9px] font-black uppercase text-slate-400 truncate w-full text-center">
+                    {p.label}
+                  </span>
                 </div>
-                <span className="text-[9px] font-black uppercase text-slate-400 truncate w-full text-center">
-                  {m.label}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center py-10">
