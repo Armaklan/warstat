@@ -149,7 +149,7 @@ function App() {
                   </span>
                   {!s.isManual && (
                     <p className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400">
-                      {formatDuration((s.endTime?.getTime() || Date.now()) - new Date(s.startTime).getTime())}
+                      {formatDuration((s.endTime ? new Date(s.endTime).getTime() : Date.now()) - new Date(s.startTime).getTime())}
                     </p>
                   )}
                   <button 

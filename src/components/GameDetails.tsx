@@ -15,7 +15,7 @@ interface GameDetailsProps {
 
 export const GameDetails: React.FC<GameDetailsProps> = ({ session, onBack }) => {
   const [copied, setCopied] = React.useState(false);
-  const globalElapsed = (session.endTime?.getTime() || Date.now()) - new Date(session.startTime).getTime();
+  const globalElapsed = (session.endTime ? new Date(session.endTime).getTime() : Date.now()) - new Date(session.startTime).getTime();
 
   const handleCopyResult = () => {
     const resultText = formatSessionResults(session);
